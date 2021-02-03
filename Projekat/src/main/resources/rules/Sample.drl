@@ -1,0 +1,314 @@
+package com.sample
+ 
+import com.sample.Pacijent;
+
+rule "1. Ako je korisnik izabrao poremecaj opsteg stanja, pitaj da li ima temperaturu"
+when
+	p:Pacijent(kategorija=="poremecaj opsteg stanja", red==0)
+then
+	p.setRed(1);
+	update(p);
+end
+
+rule "2. Ako korisnik ima temperaturu, pitaj da li ga boli grlo"
+when
+	p:Pacijent(temperatura=="da", red==1)
+then
+	p.setRed(2); 
+	update(p);
+end
+
+rule "3. Ako korisnika boli grlo, pitaj da li mu curi nos"
+when
+	p:Pacijent(temperatura=="da", grlo=="da", red==2)
+then
+	p.setRed(3);
+	update(p);
+end
+
+rule "4. Ako korisniku curi nos, pitaj da li kaslje"
+when
+	p:Pacijent(temperatura=="da", nos=="da", red==3)
+then
+	p.setRed(4);
+	update(p);
+end
+
+rule "5. Ako korisnik kaslje, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(temperatura=="da", kasalj=="da", dijagnoza=="nepoznato", red==4)
+then
+	p.setDijagnoza("<html>Piti Coldrex tablete ili Caffetin cold tablete.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "6. Ako korisnik ne kaslje, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(temperatura=="da", kasalj=="ne", dijagnoza=="nepoznato", red==4)
+then
+	p.setDijagnoza("<html>Piti Fervex/Coldrex/TaylolHot<br> NAPOMENA: ako osoba ima problema sa srcem ne uzimati TaylolHot!</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "7. Ako korisniku ne curi nos, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(temperatura=="da", nos=="ne", dijagnoza=="nepoznato", red==3)
+then
+	p.setDijagnoza("<html>Piti Panadol/Paracetamol/Febricet + Septolete.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "8. Ako korisnika ne boli grlo, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(temperatura=="da", grlo=="ne", dijagnoza=="nepoznato", red==2)
+then
+	p.setDijagnoza("<html>Piti Panadol/Paracetamol/Febricet.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "9. Ako korisnik nema temperaturu, pitaj da li ga boli grlo"
+when
+	p:Pacijent(temperatura=="ne", red==1)
+then
+	p.setRed(2);
+	update(p);
+end
+
+rule "10. Ako korisnik nema temperaturu i ne boli boli ga grlo, pitaj ga ako kaslje, kakvo je iskasljavanje"
+when
+	p:Pacijent(temperatura=="ne", grlo=="ne", red==2)
+then
+	p.setRed(6);
+	update(p);
+end
+
+rule "11. Ako je korisnikovo iskasljavanje produktivno, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(temperatura=="ne", grlo=="ne", iskasljavanje=="produktivno", dijagnoza=="nepoznato", red==6)
+then
+	p.setDijagnoza("<html>Piti Timijan/Propomucil/sirupe od jagorcevine/Flavamed sirup.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "12. Ako je korisnikovo iskasljavanje suvo, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(temperatura=="ne", grlo=="ne", iskasljavanje=="suvo", dijagnoza=="nepoznato", red==6)
+then
+	p.setDijagnoza("<html>Piti sirupe beli slez ili Omnitus.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "13. Ako korisnik nema temperaturu i boli ga grlo, pitaj da li ima gorusicu"
+when
+	p:Pacijent(temperatura=="ne", grlo=="da", red==2)
+then
+	p.setRed(5);
+	update(p);
+end
+
+rule "14. Ako korisnik ima gorusicu, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(temperatura=="ne", grlo=="da", gorusica=="da", dijagnoza=="nepoznato", red==5)
+then
+	p.setDijagnoza("<html>Piti Famotidin/Nolpazu/Gastroprazol/Rupurut/Controloc.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "15. Ako korisnik nema gorusicu, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(temperatura=="ne", grlo=="da", gorusica=="ne", dijagnoza=="nepoznato", red==5)
+then
+	p.setDijagnoza("<html>Uzimati Septolete/Strepsils/Tantum Verde(u spreju ili u pastilama)/Neoangin.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "16. Ako je korisnik izabrao promene na kozi, pitaj da li su promene u nivou koze ili ne"
+when
+	p:Pacijent(kategorija=="promene na kozi", red==0)
+then
+	p.setRed(7);
+	update(p);
+end
+
+rule "17. Ako su promene u niovu koze, pitaj kakav je izgled promene"
+when
+	p:Pacijent(nivokoze=="da", red==7)
+then
+	p.setRed(9);
+	update(p);
+end
+
+rule "18. Ako je izgled promene samo crvenilo, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(promenakozaprvo=="samo crvenilo", dijagnoza=="nepoznato", red==9)
+then
+	p.setDijagnoza("<html>Smanjiti stres!<br>Koza je osetljiva, koristiti kozmetiku za osetljivu kozu.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "19. Ako je izgled promene crvenilo i svrab, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(nivokoze=="da", promenakozaprvo=="crvenilo i svrab", dijagnoza=="nepoznato", red==9)
+then
+	p.setDijagnoza("<html>Alergija.<br>Kombinacija masti (topikalni preparati Sinopen/Fenistil) i lekova (antihistamini Xyzal/Rupafin/Aerius/Nixar).</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "20. Ako je izgled promene svrab, perutanje i crvenilo zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(nivokoze=="da", promenakozaprvo=="svrab, perutanje i crvenilo", dijagnoza=="nepoznato", red==9)
+then
+	p.setDijagnoza("<html>Ekcem ili psorijaza.<br>Kozmetika za Dermatitis (Sinoderm/Elocom/Triderm).</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "21. Ako je izgled promene crvenilo i svrab, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(nivokoze=="da", promenakozaprvo=="crvenilo i vlaznost", dijagnoza=="nepoznato", red==9)
+then
+	p.setDijagnoza("<html>Ojedi.<br>Koristiti Sudokrem/Pavlovicevu mast/Cinkovu pastu.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "22. Ako promene nisu u niovu koze, pitaj da li je promena nesto od ponudjenog"
+when
+	p:Pacijent(nivokoze=="ne", red==7)
+then
+	p.setRed(8);
+	update(p);
+end
+
+rule "23. Ako je promena rana(ogrebotina/posekotina), zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(promenakoza2=="rana(ogrebotina/posekotina)", dijagnoza=="nepoznato", red==8)
+then
+	p.setDijagnoza("<html>Za dezinfekciju koristiti Hidrogen/Povidon jod. <br> Mazati Gentamicinom/Stanicidom.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "24. Ako je promena opekotina, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(promenakoza2=="opekotina", dijagnoza=="nepoznato", red==8)
+then
+	p.setDijagnoza("<html>Koristiti Jekoderm/Sinopen/Fenistil/Gentamicin mast.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "25. Ako je promena oziljak, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(promenakoza2=="oziljak", dijagnoza=="nepoznato", red==8)
+then
+	p.setDijagnoza("<html>Koristiti Contratubex/Pantenol/Cicaplast mast.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "26. Ako je korisnik izabrao bolove, pitaj kakav je bol"
+when
+	p:Pacijent(kategorija=="bolovi", red==0)
+then
+	p.setRed(10);
+	update(p);
+end
+
+rule "27. Ako je bol hronican(traje duze od 3 meseca), zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(tipbola=="hronican(traje duze od 3 meseca)", dijagnoza=="nepoznato", red==10)
+then
+	p.setDijagnoza("<html>Piti lekove Brufen/Panadol/Rapidol + Mazati Konjsku mast koja greje/Lioton/Hepatrombin.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "28. Ako je bol akutni(trenutni), pitaj da li postoji neka od navedenih promena"
+when
+	p:Pacijent(tipbola=="akutni(trenutni)", red==10)
+then
+	p.setRed(11);
+	update(p);
+end
+
+rule "29. Ako nema promena, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(promenabol=="nema promena", red==11)
+then
+	p.setDijagnoza("<html>Piti lekove za bolove Brufen/Panadol/Rapidol.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "30. Ako je promena modrica i otok, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(promenabol=="modrica i otok", red==11)
+then
+	p.setDijagnoza("<html>Piti lekove za bolove Brufen/Panadol/Rapidol. <br> Mazati Hepalpan/Hepatrombin/Lioton. <br> Hladne obloge Konjska mast koja hladi/Blockmax.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "31. Ako je promena otok, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(promenabol=="otok", red==11)
+then
+	p.setDijagnoza("<html>Piti lekove za bolove Brufen/Panadol/Rapidol. <br> Hladne obloge Konjska mast koja hladi/Blockmax.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "32. Ako je promena modrica, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(promenabol=="modrica", red==11)
+then
+	p.setDijagnoza("<html>Piti lekove za bolove Brufen/Panadol/Rapidol. <br> Mazati Hepalpan/Hepatrombin/Lioton.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "33. Ako je korisnik izabrao gastroindestinalne tegobe, pitaj da li ga muci nesto od navedenog"
+when
+	p:Pacijent(kategorija=="gastroindestinalne tegobe", red==0)
+then
+	p.setRed(12);
+	update(p);
+end
+
+rule "34. Ako korrisnika muci dijareja, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(gastroitegobe=="dijareja", dijagnoza=="nepoznato", red==12)
+then
+	p.setDijagnoza("<html>Piti Probiotic/Smectu/Enterofuril.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "35. Ako korrisnika muci mucnina, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(gastroitegobe=="mucnina", dijagnoza=="nepoznato", red==12)
+then
+	p.setDijagnoza("<html>Uzimati djumbir/Klometol.</html>");
+	p.setRed(13);
+	update(p);
+end
+
+rule "36. Ako korrisnika muci dijareja i mucnina, zavrsiti ispitivanje i predloziti lekove"
+when
+	p:Pacijent(gastroitegobe=="dijareja i mucnina", dijagnoza=="nepoznato", red==12)
+then
+	p.setDijagnoza("<html>Uzimati Klometol.</html>");
+	p.setRed(13);
+	update(p);
+end
