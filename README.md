@@ -1,1 +1,1 @@
-# EkspertskiSistemi
+# expert systems
